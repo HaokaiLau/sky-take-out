@@ -130,6 +130,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         //使用Page集合提供的方法获取查询的总记录数和当前页数的数据集合
         long total = p.getTotal();
         List<Employee> records = p.getResult();
+        for (Employee employee : records) {
+            employee.setPassword("****");
+        }
         PageResult pageResult = new PageResult(total, records);
 
         return pageResult;
@@ -154,6 +157,34 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .id(id)
                 .build();
         //直接调用update方法传入对象,提高代码的复用性
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 根据id查询员工
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee getById(Long id) {
+        Employee employee = employeeMapper.select(id);
+        employee.setPassword("****");
+        return employee;
+    }
+
+    /**
+     * 编辑员工信息
+     * @param employeeDTO
+     */
+    @Override
+    public void update(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        //把employeeDTO中的属性拷贝到employee中
+        BeanUtils.copyProperties(employeeDTO,employee);
+        //重置修改时间和修改人
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.update(employee);
     }
 
