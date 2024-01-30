@@ -1,16 +1,20 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -78,7 +83,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         //把EmployeeDTO对象里的数据给到Employee对象
         //使用BeanUtils工具类里的方法进行属性拷贝
         Employee employee = new Employee();
-        BeanUtils.copyProperties(employeeDTO,employee);
+        BeanUtils.copyProperties(employeeDTO, employee);
 
         //设置帐号的状态,默认给的是启用状态
         employee.setStatus(StatusConstant.ENABLE);
@@ -105,6 +110,51 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setUpdateUser(BaseContext.getCurrentId());
 
         employeeMapper.insert(employee);
+    }
+
+    /**
+     * 员工分页查询
+     *
+     * @param employeePageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult page(EmployeePageQueryDTO employeePageQueryDTO) {
+        //select * from employee limit page,pageSize,使用PageHelper插件可以实现limit关键字的自动拼接以及自动查询
+
+        //使用PageHelper的startPage方法设置好分页参数
+        PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
+
+        //接收查询返回的Page集合,在调用Page提供的方法时可以实现自动查询(mapper层不用写查询语句)
+        Page<Employee> p = employeeMapper.list(employeePageQueryDTO);
+        //使用Page集合提供的方法获取查询的总记录数和当前页数的数据集合
+        long total = p.getTotal();
+        List<Employee> records = p.getResult();
+        PageResult pageResult = new PageResult(total, records);
+
+        return pageResult;
+    }
+
+    /**
+     * 启用禁用员工账号
+     *
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        //update employee set status = status where id = id
+        //这里把传进来的参数封装到对象里
+//        Employee employee = new Employee();
+//        employee.setId(id);
+//        employee.setStatus(status);
+        //使用构建器builder来创建新对象的同时给对象属性赋值
+        Employee employee = Employee.builder()
+                .status(status)
+                .id(id)
+                .build();
+        //直接调用update方法传入对象,提高代码的复用性
+        employeeMapper.update(employee);
     }
 
 }
