@@ -5,7 +5,6 @@ import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
-import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -91,9 +89,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         //设置帐号的默认密码,并且使用md5加密
         employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
 
+        //使用aop + 反射为公共字段自动填充
         //设置当前记录的创建时间和最后一次更新时间
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
+//        employee.setCreateTime(LocalDateTime.now());
+//        employee.setUpdateTime(LocalDateTime.now());
 
         //设置记录的创建者和修改者,即获取当前登录用户的id
 
@@ -105,9 +104,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 //        //通过get方法根据key获取value
 //        Long id = (Long) claims.get(JwtClaimsConstant.EMP_ID);
 
+        //使用aop + 反射为公共字段自动填充
         //新方法,通过ThreadLocal提供的set get方法对数据进行存取
-        employee.setCreateUser(BaseContext.getCurrentId());
-        employee.setUpdateUser(BaseContext.getCurrentId());
+//        employee.setCreateUser(BaseContext.getCurrentId());
+//        employee.setUpdateUser(BaseContext.getCurrentId());
 
         employeeMapper.insert(employee);
     }
@@ -182,9 +182,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = new Employee();
         //把employeeDTO中的属性拷贝到employee中
         BeanUtils.copyProperties(employeeDTO,employee);
+        //使用aop + 反射为公共字段自动填充
         //重置修改时间和修改人
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(BaseContext.getCurrentId());
+//        employee.setUpdateTime(LocalDateTime.now());
+//        employee.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.update(employee);
     }
 

@@ -4,7 +4,6 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
-import com.sky.context.BaseContext;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.entity.Category;
@@ -18,7 +17,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -37,17 +35,22 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private SetmealMapper setmealMapper;
 
+    /**
+     * 新增分类
+     * @param categoryDTO
+     */
     @Override
     public void save(CategoryDTO categoryDTO) {
         //把categoryDTO中的数据拷贝到category
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO, category);
 
+        //使用aop + 反射为公共字段自动填充
         //设置创建时间,更新时间,和创建者id更新者id
-        category.setCreateTime(LocalDateTime.now());
-        category.setUpdateTime(LocalDateTime.now());
-        category.setCreateUser(BaseContext.getCurrentId());
-        category.setUpdateUser(BaseContext.getCurrentId());
+//        category.setCreateTime(LocalDateTime.now());
+//        category.setUpdateTime(LocalDateTime.now());
+//        category.setCreateUser(BaseContext.getCurrentId());
+//        category.setUpdateUser(BaseContext.getCurrentId());
 
         //分类的默认状态给禁用
         category.setStatus(StatusConstant.DISABLE);
@@ -92,7 +95,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     /**
-     * 修改菜品
+     * 修改分类
+     * @param categoryDTO
      */
     @Override
     public void update(CategoryDTO categoryDTO) {
