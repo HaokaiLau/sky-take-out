@@ -6,3 +6,6 @@ sky:
     database: sky_take_out
     username: root
     password: lhj
+  alioss:
+    endpoint: oss-cn-hangzhou.aliyuncs.com
+    bucket-name: lhj-web-tlias
