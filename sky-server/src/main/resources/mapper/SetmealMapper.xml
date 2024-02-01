@@ -10,7 +10,7 @@
     </insert>
 
     <update id="update">
-        update dish
+        update setmeal
         <set>
             <if test="name != null">
                 name = #{name},

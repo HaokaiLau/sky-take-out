@@ -22,4 +22,10 @@ public interface SetmealService {
      * @return
      */
     PageResult page(SetmealPageQueryDTO setmealPageQueryDTO);
+
+    /**
+     * 套餐起售停售
+     * @param status
+     */
+    void startOrStop(Integer status,Long id);
 }
