@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.sky.mapper.DishMapper">
+<mapper namespace="com.sky.mapper.SetmealMapper">
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        insert into dish (name, category_id, price, image, description, status, create_time, update_time, create_user,
-                          update_user)
-        values (#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{status}, #{createTime}, #{updateTime},
-                #{createUser}, #{updateUser})
+        insert into setmeal (category_id, name, price, status, description, image, create_time, update_time, create_user,
+                             update_user)
+        values (#{categoryId},#{name},#{price},#{status},#{description},#{image},#{createTime},#{updateTime},#{createUser}
+               ,#{updateUser});
     </insert>
 
     <update id="update">
@@ -48,21 +48,6 @@
             </if>
             <if test="categoryId != null">and category_id = #{categoryId}</if>
             <if test="status != null">and status = #{status}</if>
-        </where>
-        order by create_time desc
-    </select>
-    <select id="list" resultType="com.sky.entity.Dish">
-        select * from dish
-        <where>
-            <if test="name != null">
-                and name like concat('%',#{name},'%')
-            </if>
-            <if test="categoryId != null">
-                and category_id = #{categoryId}
-            </if>
-            <if test="status != null">
-                and status = #{status}
-            </if>
         </where>
         order by create_time desc
     </select>

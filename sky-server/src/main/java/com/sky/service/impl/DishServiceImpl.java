@@ -100,6 +100,7 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 根据id查询菜品
+     *
      * @param id
      * @return
      */
@@ -112,13 +113,14 @@ public class DishServiceImpl implements DishService {
 
         //把菜品数据和口味数据封装成一个DishVO对象
         DishVO dishVO = new DishVO();
-        BeanUtils.copyProperties(dish,dishVO);
+        BeanUtils.copyProperties(dish, dishVO);
         dishVO.setFlavors(flavors);
         return dishVO;
     }
 
     /**
      * 修改菜品
+     *
      * @param dishDTO
      */
     @Transactional
@@ -128,7 +130,7 @@ public class DishServiceImpl implements DishService {
         //然后分别更新两个表的数据
         Dish dish = new Dish();
         //通过值拷贝获得dish对象
-        BeanUtils.copyProperties(dishDTO,dish);
+        BeanUtils.copyProperties(dishDTO, dish);
         dishMapper.update(dish);
 
         //获得dishDTO对象中的菜品口味集合
@@ -148,6 +150,7 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 批量删除菜品
+     *
      * @param ids
      */
     @Transactional
@@ -176,5 +179,20 @@ public class DishServiceImpl implements DishService {
             dishFlavorMapper.deleteByDishId(id);
         }
 
+    }
+
+    /**
+     * 根据分类id查询菜品
+     *
+     * @param categoryId
+     * @return
+     */
+    @Override
+    public List<Dish> list(Long categoryId) {
+        Dish dish = Dish.builder()
+                .categoryId(categoryId)
+                .status(StatusConstant.ENABLE)
+                .build();
+        return dishMapper.list(dish);
     }
 }
