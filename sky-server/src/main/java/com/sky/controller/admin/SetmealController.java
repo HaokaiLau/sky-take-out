@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author 喜欢悠然独自在
  * @version 1.0
@@ -82,6 +84,14 @@ public class SetmealController {
     public Result update(@RequestBody SetmealDTO setmealDTO) {
         log.info("修改套餐：｛｝",setmealDTO);
         setmealService.updateWithSetmealDishes(setmealDTO);
+        return Result.success();
+    }
+
+    @DeleteMapping
+    @ApiOperation("批量删除")
+    public Result delete(@RequestParam List<Long> ids) {
+        log.info("批量删除:{}",ids);
+        setmealService.deleteBatch(ids);
         return Result.success();
     }
 

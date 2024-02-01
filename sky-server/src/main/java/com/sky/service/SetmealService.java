@@ -5,6 +5,8 @@ import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.result.PageResult;
 import com.sky.vo.SetmealVO;
 
+import java.util.List;
+
 /**
  * @author 喜欢悠然独自在
  * @version 1.0
@@ -41,4 +43,10 @@ public interface SetmealService {
      * @param setmealDTO
      */
     void updateWithSetmealDishes(SetmealDTO setmealDTO);
+
+    /**
+     * 批量删除
+     * @param ids
+     */
+    void deleteBatch(List<Long> ids);
 }

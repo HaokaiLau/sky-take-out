@@ -9,6 +9,7 @@ import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.exception.SetmealEnableFailedException;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
@@ -145,7 +146,7 @@ public class SetmealServiceImpl implements SetmealService {
         BeanUtils.copyProperties(setmealDTO, setmeal);
         setmealMapper.update(setmeal);
 
-        //获取setmealDTO中的setmealId为菜品集合中的菜品赋值
+        //获取setmealDTO中的套餐Id为菜品集合中的菜品赋值
         Long setmealId = setmeal.getId();
 
         //获取菜品集合
@@ -159,6 +160,30 @@ public class SetmealServiceImpl implements SetmealService {
             }
             //插入新数据
             setmealDishMapper.insertBatch(setmealDishes);
+        }
+    }
+
+    /**
+     * 批量删除
+     *
+     * @param ids
+     */
+    @Transactional
+    @Override
+    public void deleteBatch(List<Long> ids) {
+        //判断套餐是否为启售状态,是则无法删除
+        for (Long id : ids) {
+            if (setmealMapper.selectById(id).getStatus() == StatusConstant.ENABLE) {
+                throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ON_SALE);
+            }
+        }
+        //删除数据
+        for (Long setmealId : ids) {
+            //删除套餐
+            setmealMapper.deleteById(setmealId);
+
+            //删除套餐菜品表中对应的数据
+            setmealDishMapper.deleteBySetmealId(setmealId);
         }
     }
 }
