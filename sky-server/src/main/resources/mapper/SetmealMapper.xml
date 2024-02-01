@@ -40,8 +40,8 @@
         where id = #{id}
     </update>
 
-    <select id="page" resultType="com.sky.vo.DishVO">
-        select d.*,c.name as categoryName from dish d left outer join category c on d.category_id = c.id
+    <select id="page" resultType="com.sky.vo.SetmealVO">
+        select s.*,c.name as categoryName from setmeal s left outer join category c on s.category_id = c.id
         <where>
             <if test="name != null and name != ''">
                 and name like concat('%',#{name},'%')
@@ -49,7 +49,7 @@
             <if test="categoryId != null">and category_id = #{categoryId}</if>
             <if test="status != null">and status = #{status}</if>
         </where>
-        order by create_time desc
+        order by s.create_time desc
     </select>
 
 </mapper>
