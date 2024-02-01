@@ -41,6 +41,7 @@ public class SetmealServiceImpl implements SetmealService {
 
     /**
      * 新增菜品
+     *
      * @param setmealDTO
      */
     @Transactional
@@ -48,7 +49,7 @@ public class SetmealServiceImpl implements SetmealService {
     public void saveWithDish(SetmealDTO setmealDTO) {
         //把一个套餐插入到套餐表中
         Setmeal setmeal = new Setmeal();
-        BeanUtils.copyProperties(setmealDTO,setmeal);
+        BeanUtils.copyProperties(setmealDTO, setmeal);
         setmealMapper.insert(setmeal);
         //获取从插入操作返回来的setmealId
         Long setmealId = setmeal.getId();
@@ -67,13 +68,14 @@ public class SetmealServiceImpl implements SetmealService {
 
     /**
      * 套餐分页查询
+     *
      * @param setmealPageQueryDTO
      * @return
      */
     @Override
     public PageResult page(SetmealPageQueryDTO setmealPageQueryDTO) {
         //设置分页参数
-        PageHelper.startPage(setmealPageQueryDTO.getPage(),setmealPageQueryDTO.getPageSize());
+        PageHelper.startPage(setmealPageQueryDTO.getPage(), setmealPageQueryDTO.getPageSize());
         Page<SetmealVO> p = setmealMapper.page(setmealPageQueryDTO);
         //返回一个封装好的PageResult对象
         long total = p.getTotal();
@@ -83,10 +85,11 @@ public class SetmealServiceImpl implements SetmealService {
 
     /**
      * 套餐起售停售
+     *
      * @param status
      */
     @Override
-    public void startOrStop(Integer status,Long id) {
+    public void startOrStop(Integer status, Long id) {
         //起售套餐时,判断套餐内是否有停售的菜品,有则无法起售
         if (status == StatusConstant.ENABLE) {
             List<Dish> dishList = dishMapper.getDishIdBySetmealId(id);
@@ -104,5 +107,58 @@ public class SetmealServiceImpl implements SetmealService {
                 .status(status)
                 .build();
         setmealMapper.update(setmeal);
+    }
+
+    /**
+     * 根据id查询套餐
+     *
+     * @return
+     */
+    @Override
+    public SetmealVO getById(Long id) {
+        //查询套餐表获取套餐
+        Setmeal setmeal = setmealMapper.selectById(id);
+
+        //查询setmeal_dish获取套餐内包含的菜品集合
+        List<SetmealDish> setmealDishList = setmealDishMapper.selectBySetmealId(id);
+
+        //创建一个SetmealVO
+        SetmealVO setmealVO = new SetmealVO();
+
+        //把两个查询结果封装成一个SetmealVO对象
+        BeanUtils.copyProperties(setmeal, setmealVO);
+        setmealVO.setSetmealDishes(setmealDishList);
+
+        return setmealVO;
+    }
+
+    /**
+     * 修改套餐
+     *
+     * @param setmealDTO
+     */
+    @Transactional
+    @Override
+    public void updateWithSetmealDishes(SetmealDTO setmealDTO) {
+        //把setmealDTO拆成两部分 套餐对象 和 菜品集合
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDTO, setmeal);
+        setmealMapper.update(setmeal);
+
+        //获取setmealDTO中的setmealId为菜品集合中的菜品赋值
+        Long setmealId = setmeal.getId();
+
+        //获取菜品集合
+        List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
+        //使用删除 + 插入 的形式代替更新
+        setmealDishMapper.deleteBySetmealId(setmealDTO.getId());
+        //判断菜品是否为空,不为空才为菜品集合的套餐id赋值
+        if (setmealDishes != null && setmealDishes.size() > 0) {
+            for (SetmealDish setmealDish : setmealDishes) {
+                setmealDish.setSetmealId(setmealId);
+            }
+            //插入新数据
+            setmealDishMapper.insertBatch(setmealDishes);
+        }
     }
 }
