@@ -9,3 +9,8 @@ sky:
   alioss:
     endpoint: oss-cn-hangzhou.aliyuncs.com
     bucket-name: lhj-web-tlias
+  redis:
+    host: localhost
+    port: 6379
+    password: lhj
+    database: 10
