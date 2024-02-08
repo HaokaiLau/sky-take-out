@@ -1,8 +1,12 @@
 package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersDTO;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
@@ -10,6 +14,7 @@ import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
@@ -163,5 +168,37 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+    }
+
+    /**
+     * 分页查询历史订单
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult pageQuery4User(OrdersPageQueryDTO ordersPageQueryDTO) {
+        //为OrdersPageQueryDTO的用户id属性赋值
+        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
+        //设置分页参数
+        PageHelper.startPage(ordersPageQueryDTO.getPage(),ordersPageQueryDTO.getPageSize());
+        //执行查询操作
+        Page<OrdersDTO> p = orderMapper.page(ordersPageQueryDTO);
+
+        long total = p.getTotal();
+
+        //判断是否有数据查出,有则查询各个订单对应的订单明细
+        if (p != null && p.getTotal() > 0) {
+            for (OrdersDTO ordersDTO : p) {
+                //获取订单id
+                Long orderId = ordersDTO.getId();
+                //根据订单id查询对应的订单明细
+                List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orderId);
+                //把订单明细的集合赋值给OrdersDTO对象
+                ordersDTO.setOrderDetailList(orderDetailList);
+            }
+        }
+        List<OrdersDTO> records = p.getResult();
+
+        return new PageResult(total,records);
     }
 }
