@@ -128,6 +128,9 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
+        // TODO 由于个人小程序无法接入微信支付,所以暂时直接对订单状态和支付状态直接进行修改并更新数据库的数据
+        //直接调用支付成功的功能模块对订单的相关状态进行修改
+        paySuccess(ordersPaymentDTO.getOrderNumber());
         // 当前登录用户id
         Long userId = BaseContext.getCurrentId();
         User user = userMapper.getById(userId);
@@ -160,15 +163,19 @@ public class OrderServiceImpl implements OrderService {
         // 根据订单号查询订单
         Orders ordersDB = orderMapper.getByNumber(outTradeNo);
 
-        // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
-        Orders orders = Orders.builder()
-                .id(ordersDB.getId())
-                .status(Orders.TO_BE_CONFIRMED)
-                .payStatus(Orders.PAID)
-                .checkoutTime(LocalDateTime.now())
-                .build();
+        // TODO 由于未接入微信支付,所以对订单状态和订单的支付状态进行判断,只有待付款和未支付的状态才能更新订单的相关状态
+        if (ordersDB.getStatus().equals(Orders.PENDING_PAYMENT) && ordersDB.getPayStatus().equals(Orders.UN_PAID)) {
+            // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
+            Orders orders = Orders.builder()
+                    .id(ordersDB.getId())
+                    .status(Orders.TO_BE_CONFIRMED)
+                    .payStatus(Orders.PAID)
+                    .checkoutTime(LocalDateTime.now())
+                    .build();
 
-        orderMapper.update(orders);
+            orderMapper.update(orders);
+        }
+
     }
 
     /**
@@ -229,5 +236,41 @@ public class OrderServiceImpl implements OrderService {
         orderVO.setOrderDetailList(orderDetailList);
 
         return orderVO;
+    }
+
+    /**
+     * 用户取消订单
+     * @param id
+     */
+    @Override
+    public void userCancelById(Long id) {
+        //根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        //校验订单是否存在 不存在则抛出异常
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //判断订单状态,除了待支付和待接单状态下用户可以自己取消,其他情况都抛出异常提示需要联系商家
+        if (ordersDB.getStatus() > 2) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        //新建一个订单对象,仅修改与状态相关的数据,方便订单表的更新操作
+        Orders orders = new Orders();
+        orders.setId(ordersDB.getId());
+
+        //如果订单处于待接单状态下取消,需要调用微信支付退款(省略,这里仅需把订单支付状态直接修改即可)
+        if (ordersDB.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            orders.setPayStatus(Orders.REFUND);
+        }
+
+        //更新订单状态,取消原因,取消时间
+        orders.setStatus(Orders.CANCELLED);//设置订单状态为已取消
+        orders.setCancelReason("用户取消");//设置订单的取消原因
+        orders.setCancelTime(LocalDateTime.now());//设置订单取消时间
+        orderMapper.update(orders);
+
     }
 }
