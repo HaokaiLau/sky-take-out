@@ -19,21 +19,25 @@ import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author 喜欢悠然独自在
  * @version 1.0
  */
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
@@ -180,6 +184,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 分页查询历史订单
+     *
      * @param ordersPageQueryDTO
      * @return
      */
@@ -188,7 +193,7 @@ public class OrderServiceImpl implements OrderService {
         //为OrdersPageQueryDTO的用户id属性赋值
         ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
         //设置分页参数
-        PageHelper.startPage(ordersPageQueryDTO.getPage(),ordersPageQueryDTO.getPageSize());
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
         //执行查询操作
         Page<Orders> p = orderMapper.page(ordersPageQueryDTO);
 
@@ -206,7 +211,7 @@ public class OrderServiceImpl implements OrderService {
                 List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orderId);
                 //把订单数据和订单明细数据赋值给OrdersVO对象
                 OrderVO orderVO = new OrderVO();
-                BeanUtils.copyProperties(orders,orderVO);
+                BeanUtils.copyProperties(orders, orderVO);
                 orderVO.setOrderDetailList(orderDetailList);
 
                 //把OrderVO对象添加到结果集合中
@@ -214,7 +219,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        return new PageResult(total,records);
+        return new PageResult(total, records);
     }
 
     /**
@@ -230,9 +235,9 @@ public class OrderServiceImpl implements OrderService {
         //根据订单id获取订单明细表的数据
         List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
 
-       //把查询的数据封装成orderVO对象返回
+        //把查询的数据封装成orderVO对象返回
         OrderVO orderVO = new OrderVO();
-        BeanUtils.copyProperties(orders,orderVO);
+        BeanUtils.copyProperties(orders, orderVO);
         orderVO.setOrderDetailList(orderDetailList);
 
         return orderVO;
@@ -240,6 +245,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 用户取消订单
+     *
      * @param id
      */
     @Override
@@ -276,6 +282,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 再来一单
+     *
      * @param orderId
      */
     @Transactional
@@ -291,7 +298,7 @@ public class OrderServiceImpl implements OrderService {
         for (OrderDetail orderDetail : orderDetailList) {
             ShoppingCart shoppingCart = new ShoppingCart();
             //把订单明细表的属性拷贝到购物车对象中
-            BeanUtils.copyProperties(orderDetail,shoppingCart);
+            BeanUtils.copyProperties(orderDetail, shoppingCart);
             shoppingCart.setUserId(userId);//为当前购物车对象的用户id赋值
             shoppingCart.setCreateTime(LocalDateTime.now());//设置创建时间
 
@@ -301,4 +308,69 @@ public class OrderServiceImpl implements OrderService {
         //批量插入到数据库中
         shoppingCartMapper.insertBatch(shoppingCartList);
     }
+
+    /**
+     * 订单搜索 分页查询
+     *
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        //设置分页参数
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+
+        //进行查询操作
+        Page<Orders> p = orderMapper.page(ordersPageQueryDTO);
+
+        //调用方法把订单对象集合转成订单VO对象集合
+        List<OrderVO> orderVOList = getOrderVOList(p);
+
+        //封装成PageResult对象返回
+        return new PageResult(p.getTotal(), orderVOList);
+    }
+
+    /**
+     * 把集合中的订单对象转换成订单VO对象,并且为菜品信息字段赋值
+     * @param p
+     * @return
+     */
+    private List<OrderVO> getOrderVOList(Page<Orders> p) {
+        List<OrderVO> orderVOList = new ArrayList<>();
+
+        //获取查询结果
+        List<Orders> result = p.getResult();
+
+        //作非空校验
+        if (!CollectionUtils.isEmpty(result)) {
+            for (Orders orders : p) {
+
+                //把订单数据封装成VO对象
+                OrderVO orderVO = new OrderVO();
+                BeanUtils.copyProperties(orders, orderVO);
+                orderVO.setOrderDishes(getOrderDishes(orders.getId()));
+
+                orderVOList.add(orderVO);
+
+            }
+        }
+        return orderVOList;
+    }
+
+    /**
+     * 把订单明细表的菜品数据、菜品数量以字符串的形式拼接起来
+     * @param orderId
+     * @return
+     */
+    private String getOrderDishes(Long orderId) {
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orderId);
+        List<String> orderDishList = orderDetailList.stream().map(orderDetail -> {
+            String orderDishes = orderDetail.getName() + "*" + orderDetail.getNumber() + ";";
+            log.info("orderDishes = " + orderDishes);
+            return orderDishes;
+        }).collect(Collectors.toList());//把stream流的数据收集到List集合中
+        return String.join(" ", orderDishList);
+    }
+
+
 }
