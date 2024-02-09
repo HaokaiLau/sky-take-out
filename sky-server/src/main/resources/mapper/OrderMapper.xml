@@ -43,7 +43,7 @@
         where id = #{id}
     </update>
 
-    <select id="page" resultType="com.sky.dto.OrdersDTO">
+    <select id="page" resultType="com.sky.entity.Orders">
         select * from orders
         <where>
             <if test="number != null and number!=''">
@@ -67,4 +67,5 @@
         </where>
         order by order_time desc
     </select>
+
 </mapper>

@@ -5,7 +5,6 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrdersDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
@@ -19,6 +18,7 @@ import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,13 +86,14 @@ public class OrderServiceImpl implements OrderService {
         //以当前用户id向订单表插入一条数据
         Orders orders = new Orders();
         BeanUtils.copyProperties(ordersSubmitDTO, orders);
-        orders.setUserId(userId);
-        orders.setOrderTime(LocalDateTime.now());
-        orders.setPayStatus(Orders.UN_PAID);
-        orders.setStatus(Orders.PENDING_PAYMENT);
+        orders.setUserId(userId);//设置用户id
+        orders.setOrderTime(LocalDateTime.now());//设置订单时间 当前时间
+        orders.setPayStatus(Orders.UN_PAID);//设置支付状态 初始为未支付
+        orders.setStatus(Orders.PENDING_PAYMENT);//设置订单状态 初始为待支付
         orders.setNumber(String.valueOf(System.currentTimeMillis()));//订单号
-        orders.setPhone(addressBook.getPhone());
+        orders.setPhone(addressBook.getPhone());//用户手机号
         orders.setConsignee(addressBook.getConsignee());//收货人
+        orders.setAddress(addressBook.getDetail());//地址 详细地址
 
         orderMapper.insert(orders);
 
@@ -182,23 +183,51 @@ public class OrderServiceImpl implements OrderService {
         //设置分页参数
         PageHelper.startPage(ordersPageQueryDTO.getPage(),ordersPageQueryDTO.getPageSize());
         //执行查询操作
-        Page<OrdersDTO> p = orderMapper.page(ordersPageQueryDTO);
+        Page<Orders> p = orderMapper.page(ordersPageQueryDTO);
 
         long total = p.getTotal();
+        List<Orders> result = p.getResult();
+
+        List<OrderVO> records = new ArrayList<>();
 
         //判断是否有数据查出,有则查询各个订单对应的订单明细
         if (p != null && p.getTotal() > 0) {
-            for (OrdersDTO ordersDTO : p) {
+            for (Orders orders : p) {
                 //获取订单id
-                Long orderId = ordersDTO.getId();
+                Long orderId = orders.getId();
                 //根据订单id查询对应的订单明细
                 List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orderId);
-                //把订单明细的集合赋值给OrdersDTO对象
-                ordersDTO.setOrderDetailList(orderDetailList);
+                //把订单数据和订单明细数据赋值给OrdersVO对象
+                OrderVO orderVO = new OrderVO();
+                BeanUtils.copyProperties(orders,orderVO);
+                orderVO.setOrderDetailList(orderDetailList);
+
+                //把OrderVO对象添加到结果集合中
+                records.add(orderVO);
             }
         }
-        List<OrdersDTO> records = p.getResult();
 
         return new PageResult(total,records);
+    }
+
+    /**
+     * 查询订单详情
+     *
+     * @return
+     */
+    @Override
+    public OrderVO details(Long id) {
+        //获取订单数据
+        Orders orders = orderMapper.getById(id);
+
+        //根据订单id获取订单明细表的数据
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
+
+       //把查询的数据封装成orderVO对象返回
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders,orderVO);
+        orderVO.setOrderDetailList(orderDetailList);
+
+        return orderVO;
     }
 }
