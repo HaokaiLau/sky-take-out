@@ -396,6 +396,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
+     * 派送订单
+     * @param id
+     */
+    @Override
+    public void delivery(Long id) {
+        //从数据库中查出数据,获取订单状态进行比对
+        Orders ordersDB = orderMapper.getById(id);
+        //只有订单状态为待派送的订单才能进行派送订单操作
+        if (ordersDB == null || !ordersDB.getStatus().equals(Orders.CONFIRMED)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        //创建一个订单对象
+        Orders orders = Orders.builder()
+                .id(id)
+                .status(Orders.DELIVERY_IN_PROGRESS)
+                .build();
+
+        orderMapper.update(orders);
+
+    }
+
+    /**
      * 把集合中的订单对象转换成订单VO对象,并且为菜品信息字段赋值
      *
      * @param p
