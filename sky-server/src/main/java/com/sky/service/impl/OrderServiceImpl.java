@@ -1,6 +1,6 @@
 package com.sky.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
@@ -18,6 +18,7 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -56,6 +58,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private WeChatPayUtil weChatPayUtil;
+
+    @Autowired
+    private WebSocketServer webSocketServer;
 
     /**
      * 用户下单
@@ -139,21 +144,22 @@ public class OrderServiceImpl implements OrderService {
         User user = userMapper.getById(userId);
 
         //调用微信支付接口，生成预支付交易单
-        JSONObject jsonObject = weChatPayUtil.pay(
-                ordersPaymentDTO.getOrderNumber(), //商户订单号
-                new BigDecimal(0.01), //支付金额，单位 元
-                "苍穹外卖订单", //商品描述
-                user.getOpenid() //微信用户的openid
-        );
+//        JSONObject jsonObject = weChatPayUtil.pay(
+//                ordersPaymentDTO.getOrderNumber(), //商户订单号
+//                new BigDecimal(0.01), //支付金额，单位 元
+//                "苍穹外卖订单", //商品描述
+//                user.getOpenid() //微信用户的openid
+//        );
+//
+//        if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
+//            throw new OrderBusinessException("该订单已支付");
+//        }
+//
+//        OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
+//        vo.setPackageStr(jsonObject.getString("package"));
 
-        if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
-            throw new OrderBusinessException("该订单已支付");
-        }
-
-        OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
-        vo.setPackageStr(jsonObject.getString("package"));
-
-        return vo;
+//        return vo;
+        return new OrderPaymentVO();
     }
 
     /**
@@ -165,18 +171,31 @@ public class OrderServiceImpl implements OrderService {
 
         // 根据订单号查询订单
         Orders ordersDB = orderMapper.getByNumber(outTradeNo);
+        Long orderId = ordersDB.getId();
 
         // TODO 由于未接入微信支付,所以对订单状态和订单的支付状态进行判断,只有待付款和未支付的状态才能更新订单的相关状态
         if (ordersDB.getStatus().equals(Orders.PENDING_PAYMENT) && ordersDB.getPayStatus().equals(Orders.UN_PAID)) {
             // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
             Orders orders = Orders.builder()
-                    .id(ordersDB.getId())
+                    .id(orderId)
                     .status(Orders.TO_BE_CONFIRMED)
                     .payStatus(Orders.PAID)
                     .checkoutTime(LocalDateTime.now())
                     .build();
 
             orderMapper.update(orders);
+
+            //当用户支付成功后就为管理端页面推送来单提醒
+            //通过websocket向客户端浏览器推送消息 消息封装在一个Map集合中 里面的key有 type orderId content
+            Map map = new HashMap<>();
+            map.put("type",1);//1表示来单提醒 2表示用户催单
+            map.put("orderId",orderId);
+            map.put("content","订单号：" + outTradeNo);
+
+            //把map转成json字符串
+            String json = JSON.toJSONString(map);
+            //把json字符串推送给所有与websocket连接的客户端浏览器
+            webSocketServer.sendToAllClient(json);
         }
 
     }

@@ -29,7 +29,7 @@ public class OrderTask {
     @Scheduled(cron = "0 * * * * ?")//每分钟触发一次
     public void processTimeoutOrder() {
         log.info("定时处理超时订单:{}", LocalDateTime.now());
-        //select * from orders where status = ? and order_time &lt; (当前时间 - 15分钟)
+        //select * from orders where status = ? and order_time < (当前时间 - 15分钟)
         //当前时间减去15分钟
         LocalDateTime time = LocalDateTime.now().plusMinutes(-15);
         //查出所有超时未付款订单
