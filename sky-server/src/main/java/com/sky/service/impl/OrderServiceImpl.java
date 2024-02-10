@@ -5,10 +5,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrdersConfirmDTO;
-import com.sky.dto.OrdersPageQueryDTO;
-import com.sky.dto.OrdersPaymentDTO;
-import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.*;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
@@ -334,6 +331,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 各个状态的订单数量统计
+     *
      * @return
      */
     @Override
@@ -367,7 +365,39 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
+     * 拒单
+     *
+     * @param ordersRejectionDTO
+     */
+    @Override
+    public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
+
+        Orders ordersDB = orderMapper.getById(ordersRejectionDTO.getId());
+
+        //订单只有处于待接单的状态下才能进行拒单操作,否则抛出业务异常
+        if (ordersDB == null || !(ordersDB.getStatus().equals(Orders.TO_BE_CONFIRMED))) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        //创建订单对象
+        Orders orders = Orders.builder()
+                .id(ordersRejectionDTO.getId())
+                .status(Orders.CANCELLED)
+                .rejectionReason(ordersRejectionDTO.getRejectionReason())
+                .cancelTime(LocalDateTime.now())
+                .build();
+
+        //判断订单是否已经付款,付款了需要进行退款(由于未接入微信支付,所以直接修改支付状态即可)
+        if (ordersDB.getPayStatus().equals(Orders.PAID)) {
+            orders.setPayStatus(Orders.REFUND);
+        }
+
+        orderMapper.update(orders);
+    }
+
+    /**
      * 把集合中的订单对象转换成订单VO对象,并且为菜品信息字段赋值
+     *
      * @param p
      * @return
      */
@@ -395,6 +425,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 把订单明细表的菜品数据、菜品数量以字符串的形式拼接起来
+     *
      * @param orderId
      * @return
      */
