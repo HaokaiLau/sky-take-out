@@ -188,9 +188,9 @@ public class OrderServiceImpl implements OrderService {
             //当用户支付成功后就为管理端页面推送来单提醒
             //通过websocket向客户端浏览器推送消息 消息封装在一个Map集合中 里面的key有 type orderId content
             Map map = new HashMap<>();
-            map.put("type",1);//1表示来单提醒 2表示用户催单
-            map.put("orderId",orderId);
-            map.put("content","订单号：" + outTradeNo);
+            map.put("type", 1);//1表示来单提醒 2表示用户催单
+            map.put("orderId", orderId);
+            map.put("content", "订单号：" + outTradeNo);
 
             //把map转成json字符串
             String json = JSON.toJSONString(map);
@@ -416,6 +416,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 派送订单
+     *
      * @param id
      */
     @Override
@@ -438,6 +439,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 完成订单
+     *
      * @param id
      */
     @Override
@@ -456,6 +458,31 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+    }
+
+    /**
+     * 催单
+     *
+     * @param id
+     */
+    @Override
+    public void reminder(Long id) {
+        Orders ordersDB = orderMapper.getById(id);
+        //进行非空校验且订单状态处于待接单才能进行催单
+        if (ordersDB == null && (ordersDB.getStatus() != Orders.TO_BE_CONFIRMED)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        //当用户点击催单后就为管理端页面推送催单提醒
+        //通过websocket向客户端浏览器推送消息 消息封装在一个Map集合中 里面的key有 type orderId content
+        Map map = new HashMap<>();
+        map.put("type", 2);//1表示来单提醒 2表示用户催单
+        map.put("orderId", ordersDB.getId());
+        map.put("content", "订单号：" + ordersDB.getNumber());
+
+        //把map转成json字符串
+        String json = JSON.toJSONString(map);
+        //把json字符串推送给所有与websocket连接的客户端浏览器
+        webSocketServer.sendToAllClient(json);
     }
 
     /**
