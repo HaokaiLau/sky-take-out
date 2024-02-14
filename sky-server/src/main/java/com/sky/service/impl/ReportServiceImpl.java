@@ -2,8 +2,10 @@ package com.sky.service.impl;
 
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
+import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
 import com.sky.vo.TurnoverReportVO;
+import com.sky.vo.UserReportVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,9 +27,12 @@ public class ReportServiceImpl implements ReportService {
 
     @Autowired
     private OrderMapper orderMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 营业额统计
+     *
      * @param begin
      * @param end
      * @return
@@ -53,8 +58,8 @@ public class ReportServiceImpl implements ReportService {
             LocalDateTime endTime = LocalDateTime.of(date, LocalTime.MAX);
             //根据该日的起始时间和结束时间以及订单状态(已完成)来查询数据库
             Map map = new HashMap();
-            map.put("begin",beginTime);
-            map.put("end",endTime);
+            map.put("begin", beginTime);
+            map.put("end", endTime);
             map.put("status", Orders.COMPLETED);
             //select sum(amount) from orders where order_time > #{} and order_time < #{} and status = #{status}
             Double turnover = orderMapper.sumByMap(map);
@@ -67,8 +72,65 @@ public class ReportServiceImpl implements ReportService {
         //封装返回结果
         return TurnoverReportVO
                 .builder()
-                .dateList(StringUtils.join(dateList,","))//把集合中的每一个数据以字符串的形式用逗号拼接起来
-                .turnoverList(StringUtils.join(trunoverList,","))//把集合中的每一个数据以字符串的形式用逗号拼接起来
+                .dateList(StringUtils.join(dateList, ","))//把集合中的每一个数据以字符串的形式用逗号拼接起来
+                .turnoverList(StringUtils.join(trunoverList, ","))//把集合中的每一个数据以字符串的形式用逗号拼接起来
                 .build();
+    }
+
+    /**
+     * 用户统计
+     *
+     * @param begin
+     * @param end
+     * @return
+     */
+    @Override
+    public UserReportVO getUserStatistics(LocalDate begin, LocalDate end) {
+        //把计算日期范围内所有日期的操作封装成一个方法,调用方法得到每一日的日期集合
+        List<LocalDate> dateList = getDateList(begin, end);
+
+        //查询数据库,得到每一天的用户总量,封装成集合返回
+        List<Integer> totalUserList = new ArrayList<>();
+
+        //查询数据库,得到每一天新增的用户,封装成集合返回
+        List<Integer> newUserList = new ArrayList<>();
+
+        for (LocalDate date : dateList) {
+            LocalDateTime beginTime = LocalDateTime.of(date, LocalTime.MIN);
+            LocalDateTime endTime = LocalDateTime.of(date, LocalTime.MAX);
+            Map map = new HashMap();
+
+            //先存入截止时间,查询截止到该日的用户总量
+            map.put("end",endTime);
+            Integer totalUser = userMapper.countByMap(map);
+            totalUserList.add(totalUser);
+
+            //再存入起始时间,结合截止时间查询该时间范围内新增的用户数
+            map.put("begin",beginTime);
+            Integer newUser = userMapper.countByMap(map);
+            //如果当天没有新增用户,则赋予默认值0
+            newUser = newUser == null ? 0 : newUser;
+            newUserList.add(newUser);
+        }
+
+        //封装成UserReportVO对象返回
+        return UserReportVO.builder()
+                .dateList(StringUtils.join(dateList, ","))
+                .newUserList(StringUtils.join(newUserList, ","))
+                .totalUserList(StringUtils.join(totalUserList, ","))
+                .build();
+    }
+
+    private List<LocalDate> getDateList(LocalDate begin, LocalDate end) {
+        //该集合用于存放begin到end范围内的每天的日期
+        List<LocalDate> dateList = new ArrayList<>();
+        //集合中第一个数据就是begin
+        dateList.add(begin);
+        //while判断日期是否到了end 没有就往后加一天,然后添加到集合中
+        while (!begin.equals(end)) {
+            begin = begin.plusDays(1);
+            dateList.add(begin);
+        }
+        return dateList;
     }
 }
