@@ -3,6 +3,7 @@ package com.sky.controller.admin;
 import com.sky.result.Result;
 import com.sky.service.ReportService;
 import com.sky.vo.OrderReportVO;
+import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import io.swagger.annotations.Api;
@@ -31,6 +32,7 @@ public class ReportController {
 
     /**
      * 营业额统计
+     *
      * @param begin
      * @param end
      * @return
@@ -40,13 +42,14 @@ public class ReportController {
     public Result<TurnoverReportVO> turnoverStatistics(
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
-        log.info("营业额统计:{},{}",begin,end);
-        TurnoverReportVO turnoverReportVO = reportService.getTurnoverStatistics(begin,end);
+        log.info("营业额统计:{},{}", begin, end);
+        TurnoverReportVO turnoverReportVO = reportService.getTurnoverStatistics(begin, end);
         return Result.success(turnoverReportVO);
     }
 
     /**
      * 用户统计
+     *
      * @return
      */
     @GetMapping("/userStatistics")
@@ -54,13 +57,14 @@ public class ReportController {
     public Result<UserReportVO> userStatistics(
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
-        log.info("用户统计:{},{}",begin,end);
-        UserReportVO userReportVO = reportService.getUserStatistics(begin,end);
+        log.info("用户统计:{},{}", begin, end);
+        UserReportVO userReportVO = reportService.getUserStatistics(begin, end);
         return Result.success(userReportVO);
     }
 
     /**
      * 订单统计
+     *
      * @param begin
      * @param end
      * @return
@@ -70,9 +74,25 @@ public class ReportController {
     public Result<OrderReportVO> ordersStatistics(
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
-        log.info("订单统计:{},{}",begin,end);
-        OrderReportVO orderReportVO = reportService.getOrdersStatistics(begin,end);
+        log.info("订单统计:{},{}", begin, end);
+        OrderReportVO orderReportVO = reportService.getOrdersStatistics(begin, end);
         return Result.success(orderReportVO);
+    }
+
+    /**
+     * 查询销量排名top10
+     * @param begin
+     * @param end
+     * @return
+     */
+    @GetMapping("/top10")
+    @ApiOperation("查询销量排名top10")
+    public Result<SalesTop10ReportVO> top10(
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+        log.info("查询销量排名top10:{},{}", begin, end);
+        SalesTop10ReportVO salesTop10ReportVO = reportService.getTop10(begin,end);
+        return Result.success(salesTop10ReportVO);
     }
 
 }

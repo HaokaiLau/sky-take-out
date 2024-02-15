@@ -1,6 +1,7 @@
 package com.sky.mapper;
 
 import com.github.pagehelper.Page;
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
 import org.apache.ibatis.annotations.Mapper;
@@ -19,12 +20,14 @@ public interface OrderMapper {
 
     /**
      * 插入订单数据
+     *
      * @param orders
      */
     void insert(Orders orders);
 
     /**
      * 根据订单号查询订单
+     *
      * @param orderNumber
      */
     @Select("select * from orders where number = #{orderNumber}")
@@ -32,12 +35,14 @@ public interface OrderMapper {
 
     /**
      * 修改订单信息
+     *
      * @param orders
      */
     void update(Orders orders);
 
     /**
      * 分页查询
+     *
      * @param ordersPageQueryDTO
      * @return
      */
@@ -46,6 +51,7 @@ public interface OrderMapper {
 
     /**
      * 根据id获取订单数据
+     *
      * @param id
      * @return
      */
@@ -54,6 +60,7 @@ public interface OrderMapper {
 
     /**
      * 根据订单状态查询订单数量
+     *
      * @param status
      * @return
      */
@@ -62,6 +69,7 @@ public interface OrderMapper {
 
     /**
      * 根据订单状态和查询时间查询订单
+     *
      * @param status
      * @param orderTime
      * @return
@@ -71,6 +79,7 @@ public interface OrderMapper {
 
     /**
      * 根据该日的起始时间和结束时间以及订单状态查询
+     *
      * @param map
      * @return
      */
@@ -78,8 +87,18 @@ public interface OrderMapper {
 
     /**
      * 根据起始时间和结束时间以及订单状态查询订单数量
+     *
      * @param map
      * @return
      */
     Integer countByMap(Map map);
+
+    /**
+     * 统计指定时间区间内的销量排名前十
+     *
+     * @param begin
+     * @param end
+     * @return
+     */
+    List<GoodsSalesDTO> getSalesTop10(LocalDateTime begin, LocalDateTime end);
 }
