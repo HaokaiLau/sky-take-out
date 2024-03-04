@@ -1,6 +1,9 @@
 CREATE DATABASE  IF NOT EXISTS `sky_take_out` ;
 USE `sky_take_out`;
 
+-- ----------------------------
+-- Table structure for address_book
+-- ----------------------------
 DROP TABLE IF EXISTS `address_book`;
 CREATE TABLE `address_book` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -20,6 +23,9 @@ CREATE TABLE `address_book` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='地址簿';
 
+-- ----------------------------
+-- Table structure for category
+-- ----------------------------
 DROP TABLE IF EXISTS `category`;
 CREATE TABLE `category` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -35,6 +41,9 @@ CREATE TABLE `category` (
   UNIQUE KEY `idx_category_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='菜品及套餐分类';
 
+-- ----------------------------
+-- Records of category
+-- ----------------------------
 INSERT INTO `category` VALUES (11,1,'酒水饮料',10,1,'2022-06-09 22:09:18','2022-06-09 22:09:18',1,1);
 INSERT INTO `category` VALUES (12,1,'传统主食',9,1,'2022-06-09 22:09:32','2022-06-09 22:18:53',1,1);
 INSERT INTO `category` VALUES (13,2,'人气套餐',12,1,'2022-06-09 22:11:38','2022-06-10 11:04:40',1,1);
@@ -46,6 +55,9 @@ INSERT INTO `category` VALUES (19,1,'新鲜时蔬',7,1,'2022-06-09 22:18:12','20
 INSERT INTO `category` VALUES (20,1,'水煮鱼',8,1,'2022-06-09 22:22:29','2022-06-09 22:23:45',1,1);
 INSERT INTO `category` VALUES (21,1,'汤类',11,1,'2022-06-10 10:51:47','2022-06-10 10:51:47',1,1);
 
+-- ----------------------------
+-- Table structure for dish
+-- ----------------------------
 DROP TABLE IF EXISTS `dish`;
 CREATE TABLE `dish` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -63,6 +75,9 @@ CREATE TABLE `dish` (
   UNIQUE KEY `idx_dish_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='菜品';
 
+-- ----------------------------
+-- Records of dish
+-- ----------------------------
 INSERT INTO `dish` VALUES (46,'王老吉',11,6.00,'https://sky-itcast.oss-cn-beijing.aliyuncs.com/41bfcacf-7ad4-4927-8b26-df366553a94c.png','',1,'2022-06-09 22:40:47','2022-06-09 22:40:47',1,1);
 INSERT INTO `dish` VALUES (47,'北冰洋',11,4.00,'https://sky-itcast.oss-cn-beijing.aliyuncs.com/4451d4be-89a2-4939-9c69-3a87151cb979.png','还是小时候的味道',1,'2022-06-10 09:18:49','2022-06-10 09:18:49',1,1);
 INSERT INTO `dish` VALUES (48,'雪花啤酒',11,4.00,'https://sky-itcast.oss-cn-beijing.aliyuncs.com/bf8cbfc1-04d2-40e8-9826-061ee41ab87c.png','',1,'2022-06-10 09:22:54','2022-06-10 09:22:54',1,1);
@@ -88,6 +103,9 @@ INSERT INTO `dish` VALUES (67,'鮰鱼2斤',16,72.00,'https://sky-itcast.oss-cn-b
 INSERT INTO `dish` VALUES (68,'鸡蛋汤',21,4.00,'https://sky-itcast.oss-cn-beijing.aliyuncs.com/c09a0ee8-9d19-428d-81b9-746221824113.png','配料：鸡蛋，紫菜',1,'2022-06-10 10:54:25','2022-06-10 10:54:25',1,1);
 INSERT INTO `dish` VALUES (69,'平菇豆腐汤',21,6.00,'https://sky-itcast.oss-cn-beijing.aliyuncs.com/16d0a3d6-2253-4cfc-9b49-bf7bd9eb2ad2.png','配料：豆腐，平菇',1,'2022-06-10 10:55:02','2022-06-10 10:55:02',1,1);
 
+-- ----------------------------
+-- Table structure for dish_flavor
+-- ----------------------------
 DROP TABLE IF EXISTS `dish_flavor`;
 CREATE TABLE `dish_flavor` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -97,6 +115,9 @@ CREATE TABLE `dish_flavor` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='菜品口味关系表';
 
+-- ----------------------------
+-- Records of dish_flavor
+-- ----------------------------
 INSERT INTO `dish_flavor` VALUES (40,10,'甜味','[\"无糖\",\"少糖\",\"半糖\",\"多糖\",\"全糖\"]');
 INSERT INTO `dish_flavor` VALUES (41,7,'忌口','[\"不要葱\",\"不要蒜\",\"不要香菜\",\"不要辣\"]');
 INSERT INTO `dish_flavor` VALUES (42,7,'温度','[\"热饮\",\"常温\",\"去冰\",\"少冰\",\"多冰\"]');
@@ -122,6 +143,9 @@ INSERT INTO `dish_flavor` VALUES (101,66,'辣度','[\"不辣\",\"微辣\",\"中�
 INSERT INTO `dish_flavor` VALUES (102,67,'辣度','[\"不辣\",\"微辣\",\"中辣\",\"重辣\"]');
 INSERT INTO `dish_flavor` VALUES (103,65,'辣度','[\"不辣\",\"微辣\",\"中辣\",\"重辣\"]');
 
+-- ----------------------------
+-- Table structure for employee
+-- ----------------------------
 DROP TABLE IF EXISTS `employee`;
 CREATE TABLE `employee` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -140,8 +164,14 @@ CREATE TABLE `employee` (
   UNIQUE KEY `idx_username` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='员工信息';
 
+-- ----------------------------
+-- Records of employee
+-- ----------------------------
 INSERT INTO `employee` VALUES (1,'管理员','admin','123456','13812312312','1','110101199001010047',1,'2022-02-15 15:51:20','2022-02-17 09:16:20',10,1);
 
+-- ----------------------------
+-- Table structure for order_detail
+-- ----------------------------
 DROP TABLE IF EXISTS `order_detail`;
 CREATE TABLE `order_detail` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -156,6 +186,9 @@ CREATE TABLE `order_detail` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='订单明细表';
 
+-- ----------------------------
+-- Table structure for orders
+-- ----------------------------
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -185,6 +218,9 @@ CREATE TABLE `orders` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='订单表';
 
+-- ----------------------------
+-- Table structure for setmeal
+-- ----------------------------
 DROP TABLE IF EXISTS `setmeal`;
 CREATE TABLE `setmeal` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -202,6 +238,9 @@ CREATE TABLE `setmeal` (
   UNIQUE KEY `idx_setmeal_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='套餐';
 
+-- ----------------------------
+-- Table structure for setmeal_dish
+-- ----------------------------
 DROP TABLE IF EXISTS `setmeal_dish`;
 CREATE TABLE `setmeal_dish` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -213,6 +252,9 @@ CREATE TABLE `setmeal_dish` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='套餐菜品关系';
 
+-- ----------------------------
+-- Table structure for shopping_cart
+-- ----------------------------
 DROP TABLE IF EXISTS `shopping_cart`;
 CREATE TABLE `shopping_cart` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -228,6 +270,9 @@ CREATE TABLE `shopping_cart` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3 COLLATE=utf8_bin COMMENT='购物车';
 
+-- ----------------------------
+-- Table structure for user
+-- ----------------------------
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
