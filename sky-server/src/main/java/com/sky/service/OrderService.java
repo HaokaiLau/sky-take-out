@@ -103,4 +103,10 @@ public interface OrderService {
      * @param id
      */
     void reminder(Long id);
+
+    /**
+     * 商家端取消订单
+     * @param ordersCancelDTO
+     */
+    void cancel(OrdersCancelDTO ordersCancelDTO) throws Exception;
 }
