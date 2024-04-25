@@ -1,0 +1,19 @@
+2024/03/15 21:51:34 [error] 17316#3536: *1 "D:\code\front-end\server\nginx-1.24.0-sky02/html/sky/index.html" is not found (3: The system cannot find the path specified), client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", host: "localhost"
+2024/03/15 21:51:56 [error] 17316#3536: *1 "D:\code\front-end\server\nginx-1.24.0-sky02/html/sky/index.html" is not found (3: The system cannot find the path specified), client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", host: "localhost"
+2024/03/15 21:52:46 [error] 24268#24708: *1 "D:\code\front-end\server\nginx-1.24.0-sky02/html/sky/index.html" is not found (3: The system cannot find the path specified), client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", host: "localhost"
+2024/03/15 21:53:19 [error] 24268#24708: *1 "D:\code\front-end\server\nginx-1.24.0-sky02/html/sky/index.html" is not found (3: The system cannot find the path specified), client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", host: "localhost"
+2024/03/15 21:55:56 [error] 24268#24708: *4 "D:\code\front-end\server\nginx-1.24.0-sky02/html/sky/index.html" is not found (3: The system cannot find the path specified), client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", host: "localhost"
+2024/03/15 22:14:25 [notice] 2512#18780: signal process started
+2024/03/18 21:38:03 [notice] 11876#22564: signal process started
+2024/03/19 14:32:03 [error] 21532#24492: *86 connect() failed (10061: No connection could be made because the target machine actively refused it) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "POST /api/employee/login HTTP/1.1", upstream: "http://127.0.0.1:8080/admin/employee/login", host: "localhost", referrer: "http://localhost/"
+2024/03/19 14:32:05 [error] 21532#24492: *86 connect() failed (10061: No connection could be made because the target machine actively refused it) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "POST /api/employee/login HTTP/1.1", upstream: "http://[::1]:8080/admin/employee/login", host: "localhost", referrer: "http://localhost/"
+2024/03/19 22:13:30 [emerg] 25832#25784: unexpected end of parameter, expecting ";" in command line
+2024/03/19 22:13:46 [notice] 13052#18648: signal process started
+2024/03/21 21:33:43 [notice] 16356#21060: signal process started
+2024/03/21 22:11:42 [notice] 13628#24964: signal process started
+2024/03/21 22:23:06 [notice] 27444#28400: signal process started
+2024/04/17 16:00:34 [emerg] 20224#7748: unexpected end of parameter, expecting ";" in command line
+2024/04/17 16:00:37 [emerg] 21248#576: unexpected end of parameter, expecting ";" in command line
+2024/04/17 16:13:03 [notice] 22792#20312: signal process started
+2024/04/21 17:25:02 [error] 6888#1200: *10 upstream timed out (10060: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond) while reading response header from upstream, client: 127.0.0.1, server: localhost, request: "PUT /api/employee HTTP/1.1", upstream: "http://[::1]:8080/admin/employee", host: "localhost", referrer: "http://localhost/"
+2024/04/25 21:56:03 [notice] 23460#19312: signal process started

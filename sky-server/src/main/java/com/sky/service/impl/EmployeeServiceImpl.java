@@ -5,6 +5,7 @@ import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
+import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
@@ -12,6 +13,7 @@ import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
+import com.sky.exception.PermissionException;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
@@ -78,6 +80,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public void save(EmployeeDTO employeeDTO) {
+        this.authentication();
         //把EmployeeDTO对象里的数据给到Employee对象
         //使用BeanUtils工具类里的方法进行属性拷贝
         Employee employee = new Employee();
@@ -146,6 +149,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public void startOrStop(Integer status, Long id) {
+        this.authentication();
         //update employee set status = status where id = id
         //这里把传进来的参数封装到对象里
 //        Employee employee = new Employee();
@@ -179,6 +183,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public void update(EmployeeDTO employeeDTO) {
+        this.authentication();
         Employee employee = new Employee();
         //把employeeDTO中的属性拷贝到employee中
         BeanUtils.copyProperties(employeeDTO,employee);
@@ -187,6 +192,16 @@ public class EmployeeServiceImpl implements EmployeeService {
 //        employee.setUpdateTime(LocalDateTime.now());
 //        employee.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.update(employee);
+    }
+
+    /**
+     * 判断当前账号是否为管理员账号
+     * 非管理员账号无法对员工信息进行增删改功能
+     */
+    public void authentication() {
+        if (BaseContext.getCurrentId() != 1) {
+            throw new PermissionException(MessageConstant.INSUFFICIENT_PERMISSIONS);
+        }
     }
 
 }
